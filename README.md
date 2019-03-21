@@ -10,7 +10,8 @@ Requires Python 3.6 and virtualenv
 virtualenv -p python3.6 venv
 func init
 func new
-func start
+func start # start locally
+func azure functionapp publish FUNCTION_APP # publish to azure
 ```
 
 

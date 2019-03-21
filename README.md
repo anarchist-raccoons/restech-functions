@@ -1,5 +1,18 @@
 # Introduction 
-Azure Functions Serverless Web Service for integration between Panopta and ConnectWise
+Azure Functions Serverless Web Service for integration between Panopta and Connect
+
+# Setup
+
+npm install -g azure-functions-core-tools
+Requires Python 3.6 and virtualenv
+
+```
+virtualenv -p python3.6 venv
+func init
+func new
+func start
+```
+
 
 # Notes
 
@@ -13,17 +26,8 @@ customer_id
 outage_id
 (other bits)
 
-# Components
 
-Azure Functions
-Azure Function App
-Azure API Management
 
-# Commands
-
-Requires Python 3.6 and virtualenv
-
-virtualenv -p python3.6 DEST
 
 # Functions
 

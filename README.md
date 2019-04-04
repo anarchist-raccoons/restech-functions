@@ -24,12 +24,9 @@ https://azure.microsoft.com/en-gb/blog/benefits-of-using-azure-api-management-wi
 
 # Variables
 
-customer_id
-outage_id
-(other bits)
-
-
-
+* customer_id
+* outage_id
+* (other bits)
 
 # Functions
 

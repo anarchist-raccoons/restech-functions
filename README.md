@@ -1,6 +1,10 @@
 # Introduction 
 Azure Functions Serverless Web Service for integration between Panopta and Connect
 
+# Reference
+
+https://docs.microsoft.com/en-gb/azure/azure-functions/functions-create-first-function-python
+
 # Setup
 
 npm install -g azure-functions-core-tools
@@ -8,33 +12,40 @@ npm install -g azure-functions-core-tools
 Requires Python 3.6 and virtualenv
 
 ```
-virtualenv -p python3.6 venv
+# do this just once
+python3.6 -m venv .env
+source .env/bin/activate
 func init
-func new
+>> choose option 3. python
+
+# do this each time you need the virtualenv
+source .env/bin/activate
+
+# do this for each new function
+func new 
+>> choose a template
+>> provide a name (this creates a directory with the function code)
 func start # start locally
-func azure functionapp publish FUNCTION_APP # publish to azure
+func azure functionapp publish FUNCTION_APP_NAME # publish to azure
 ```
-
-
-# Notes
-
-{"customFieldConditions":"caption=\"Outage ID\" AND value=\"THEID\""}
-
-https://azure.microsoft.com/en-gb/blog/benefits-of-using-azure-api-management-with-microservices/
 
 # Variables
 
-* customer_id
+* Company_id
 * outage_id
-* (other bits)
+* items
+* reason
+* services
+* fqdn
+* starttime
 
 # Functions
 
 # Outage
 
-get customer_id from CW (poss stored as env var)
-get service board (poss stored as env var)
-create ticket
+1) check for required variables
+2) get customer_id from CW
+3) create ticket
 
 # Clear
 

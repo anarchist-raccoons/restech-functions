@@ -4,6 +4,7 @@ Azure Functions Serverless Web Service for integration between Panopta and Conne
 # Setup
 
 npm install -g azure-functions-core-tools
+
 Requires Python 3.6 and virtualenv
 
 ```

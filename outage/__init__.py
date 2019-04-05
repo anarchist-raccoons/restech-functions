@@ -17,7 +17,6 @@ import azure.functions as func
 #  Set in the Azure App Service > Application Settings
 
 # @todo - secure the endpoint via IP restriction, or match the source URL
-# @todo - install requests on azure app (https://stackoverflow.com/questions/43970307/azure-functions-installing-python-modules-and-extensions-on-consumption-plan)
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed an outage request.')

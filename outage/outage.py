@@ -3,7 +3,7 @@ from typing import List, Dict
 from azure.functions import HttpRequest as REQUEST
 from azure.functions import HttpResponse as RESPONSE
 
-from . import cw_connector as cw
+import connectwise.connect as cw
 
 '''
  Create a ticket in ConnectWise on receipt of Outage Information
@@ -42,7 +42,7 @@ def get_outage(req: REQUEST) -> Dict:
     logging.info(f"Received: {params}")
     # check if any of the required params is missing
     if not all(param in params for param in panopta_required_params()):
-        return missing_param_message()
+        return missing_param_response()
     ticket_exists = cw.find_ticket(params['outage_id'])
     return existing_ticket(ticket_exists) if ticket_exists else cw.create_ticket(params)
 
@@ -71,7 +71,7 @@ def existing_ticket(ticket: Dict)->Dict:
 
 
 
-def missing_param_message()->Dict:
+def missing_param_response()->Dict:
     return { 
         "message": "Missing one or more required parameters",
         "status": 422

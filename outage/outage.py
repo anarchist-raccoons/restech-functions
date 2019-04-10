@@ -1,6 +1,7 @@
 import logging
-from typing import * 
-import azure.functions as func
+from typing import List, Dict 
+from azure.functions import HttpRequest as REQUEST
+from azure.functions import HttpResponse as RESPONSE
 
 from . import cw_connector as cw
 
@@ -17,54 +18,40 @@ from . import cw_connector as cw
  @todo - secure the endpoint via IP restriction, or match the source URL
 '''
 
-
-
-def run(req: func.HttpRequest) -> func.HttpResponse:
+def run(req: REQUEST) -> RESPONSE:
     logging.info('Python HTTP trigger function processed an outage request.')
-
-    if req.method == "POST":
-        outage = receive_outage(req)
-        return func.HttpResponse(
-            outage['message'],status_code=outage['status']
-        )
-    else:
-        return func.HttpResponse(
-            f"{req.method} Method Not Allowed",
-            status_code=405
-        )
+    return allow_request(req) if req.method == "POST" else block_request()
 
 
 
-def receive_outage(req: func.HttpRequest) -> Dict:
-    logging.info('Outage Received')
+def allow_request(req: REQUEST)->RESPONSE:
+    outage = get_outage(req)
+    return RESPONSE(outage['message'], status_code=outage['status'])
 
+
+
+def block_request(req: REQUEST)->RESPONSE:
+    message = f"{req.method} Method Not Allowed"
+    return RESPONSE(message,status_code=405)
+
+
+
+def get_outage(req: REQUEST) -> Dict:
+    logging.info('Outage Received') 
     params = req.get_json()
-    required_params = get_required_params()
     logging.info(f"Received: {params}")
-    # check all params are present
-    if len([x for x in required_params if x in params]) == len(required_params):
-        ticket_exists = cw.find_ticket(params['outage_id'])
-        # check whether ticket exists
-        if ticket_exists:
-            return { 
-                "message": f"Ticket exists {ticket_exists[0]['id']}",
-                "status": 200
-            }
-        else:
-            return cw.create_ticket(params)
-
-    else:
-        return { 
-            "message": "Missing one or more required parameters",
-            "status": 422
-        }
+    # check if any of the required params is missing
+    if not all(param in params for param in panopta_required_params()):
+        return missing_param_message()
+    ticket_exists = cw.find_ticket(params['outage_id'])
+    return existing_ticket(ticket_exists) if ticket_exists else cw.create_ticket(params)
 
 
 
 '''
 Returns a list of the params required by Panopta
 '''
-def get_required_params()->List[str]:
+def panopta_required_params()->List[str]:
     return ['Company_name', 
             'outage_id',
             'fqdn',
@@ -73,3 +60,20 @@ def get_required_params()->List[str]:
             'items',
             'starttime'
             ]
+
+
+
+def existing_ticket(ticket: Dict)->Dict:
+    return { 
+        "message": f"Ticket exists {ticket[0]['id']}",
+        "status": 200
+        }
+
+
+
+def missing_param_message()->Dict:
+    return { 
+        "message": "Missing one or more required parameters",
+        "status": 422
+        }
+

@@ -1,6 +1,4 @@
-from azure.functions import HttpRequest as request
-from azure.functions import HttpResponse as response
 from . import outage
 
-def main(req: request) -> response:
+def main(req: outage.REQUEST) -> outage.RESPONSE:
     return outage.run(req)

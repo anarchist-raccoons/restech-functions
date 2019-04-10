@@ -3,7 +3,7 @@ import logging
 import requests
 import os
 import json
-from requests.auth import HTTPBasicAuth
+#from requests.auth import HTTPBasicAuth
 
 '''
 This module takes care of the data exchange between the application and CW.

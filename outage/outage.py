@@ -1,10 +1,5 @@
 import logging
-# pip install requests
-import requests
-import os
-import json
-from requests.auth import HTTPBasicAuth
-from typing import List
+from typing import * 
 import azure.functions as func
 
 from . import cw_connector as cw
@@ -40,8 +35,9 @@ def run(req: func.HttpRequest) -> func.HttpResponse:
 
 
 
-def receive_outage(req):
+def receive_outage(req: func.HttpRequest) -> Dict:
     logging.info('Outage Received')
+
     params = req.get_json()
     required_params = get_required_params()
     logging.info(f"Received: {params}")

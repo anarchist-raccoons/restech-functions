@@ -18,6 +18,8 @@ import azure.functions as func
 
 # @todo - secure the endpoint via IP restriction, or match the source URL
 
+
+
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed an outage request.')
 
@@ -32,12 +34,15 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             status_code=405
         )
 
+
+
 def receive_outage(req):
     logging.info('Outage Received')
     params = req.get_json()
+    required_params = get_required_params()
     logging.info(f"Received: {params}")
     # check all params are present
-    if 'Company_name' in params and 'outage_id' in params and 'fqdn' in params and 'reason' in params and 'services' in params and 'items' in params and 'starttime' in params:
+    if len([x for x in required_params if x in params]) == len(required_params):
         ticket_exists = cw_connector.find_ticket(params['outage_id'])
         # check whether ticket exists
         if ticket_exists:
@@ -54,4 +59,15 @@ def receive_outage(req):
             "status": 422
         }
 
-
+'''
+Returns a list of the params required by Panopta
+'''
+def get_required_params():
+    return ['Company_name', 
+            'outage_id',
+            'fqdn',
+            'reason',
+            'services',
+            'items',
+            'starttime'
+            ]

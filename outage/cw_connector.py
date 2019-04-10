@@ -39,7 +39,7 @@ def create_ticket(params):
          "company": { "id": int(company_name(params['Company_name'])) }, 
          "recordType": "ServiceTicket", 
          "board": { "id": int(service_board()) },
-         #"description": desc,
+         "initialDescription": desc,
          "customFields": [
              {
                 'id': 60, 

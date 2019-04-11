@@ -1,47 +1,50 @@
 import logging
-from typing import 
+from typing import * 
 import requests
 import os
 import json
 
 
-APP_JSON =  'application/json'
+__APP_JSON =  'application/json'
+__HEADERS = {'content-type': __APP_JSON, 'accept': __APP_JSON} 
+
 
 '''
 This module takes care of the data exchange between the application and CW.
 '''
-def company_name(custid: str):
+def company_name(custid:str)->str:
     logging.info('Get Company ID')
-    try:
-        app_json =  'application/json'
-        headers = {'content-type': APP_JSON, 'accept': APP_JSON}
-        r = requests.get( 
-                get_full_request_path(custid), 
-                headers=headers, 
-                auth=(cw_user(), cw_key()) 
-                )
-        return r.json()[0]['id']
-    except Exception as e:
-        logging.error(f"Company request failed {e}")
-        return int(os.getenv('CW_CATCHALL')) #TODO: check why returning an int
+    uri = get_company_name_URI(custid) 
+    err_message = "Company request failed" 
+    resp = generic_get_request(uri, err_message)
+    return resp[0]['id']
 
 
-def find_ticket(outage_id):
+def find_ticket(outage_id:str)->Dict:
     logging.info('Find Ticket')
+    uri = get_ticket_URI(outage_id) 
+    err_message = "Company request failed" 
+    return generic_get_request(uri, err_message)
+
+
+def generic_get_request(uri:str, error_message:str)->Dict:
     try:
-        headers = {'content-type': 'application/json', 'accept': 'application/json'}
-        r = requests.get( f"{cw_uri()}/service/tickets?customFieldConditions=caption=\"Outage ID\" AND value = {outage_id}" , headers=headers, auth=(cw_user(), cw_key()) )
+        r = requests.get( 
+                uri, 
+                headers=__HEADERS, 
+                auth=(cw_user(), cw_key()))
         return r.json()
     except Exception as e:
-        logging.error(f"Ticket find Failed {e}")
-        return
+        logging.error(error_message + str(e))
 
 
-def create_ticket(params):
+def create_ticket(params)->Dict:
     logging.info('Create Ticket')
     try:
-        headers = {'content-type': 'application/json', 'accept': 'application/json'}
-        desc = f"Item(s): {params['items']} \nServices: {params['services']} \nReasons: {params['reason']}\nBegan at: {params['starttime']}"
+        desc = (f"Item(s): {params['items']} \n"
+                f"Services: {params['services']}\n"
+                f"Reasons: {params['reason']}\n"
+                f"Began at: {params['starttime']}")
         body = { 
          "summary": f"Panopta Alert on {params['fqdn']}" ,
          "company": { "id": int(company_name(params['Company_name'])) }, 
@@ -56,11 +59,15 @@ def create_ticket(params):
                 'entryMethod': 'EntryField', 
                 'numberOfDecimals': 0,
                 'value': params['outage_id']
-             }
-            ]
-        }
+                }
+             ]
+         }
         data = json.dumps(body)
-        r = requests.post( f"{cw_uri()}/service/tickets" , headers=headers, data=data, auth=(cw_user(), cw_key()) )
+        r = requests.post( 
+                f"{cw_uri()}/service/tickets", 
+                headers=__HEADERS,
+                data=data,
+                auth=(cw_user(), cw_key()))
         return { 
             "message": str(r.json()),
             "status": r.status_code
@@ -92,6 +99,12 @@ def cw_uri():
 def cw_catchall():
     return os.getenv('CW_CATCHALL')
 
-def get_full_request_path(custid: str)->str:
+
+def get_company_name_URI(custid: str)->str:
     path = '/company/companies?conditions=identifier="' + custid + '"'
+    return f"{cw_uri()}{path}"
+
+
+def get_ticket_URI(outage_id: str)->str:
+    path = f"/service/tickets?customFieldConditions=caption=\"Outage ID\" AND value = {outage_id}"
     return f"{cw_uri()}{path}"

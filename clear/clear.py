@@ -8,7 +8,7 @@ import connectwise.connect as cw
 
 def run(req: REQUEST) -> RESPONSE:
     logging.info('\nPython HTTP trigger function processed a clear request.\n')
-    return allow_request(req) if req.method == "PATCH" else block_request(req)
+    return allow_request(req) if req.method == "POST" else block_request(req)
 
 
 def allow_request(req: REQUEST)->RESPONSE:

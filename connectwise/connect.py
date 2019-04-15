@@ -133,23 +133,24 @@ def get_ticket_creation_body(params:Dict)->Dict:
 
 def get_ticket_resolution_body(params:Dict)->List[Dict]:
     status = {"id": cw_resolved()}
-    summary = f"Panopta Alert on {params['fqdn']}: {format_duration(params['duration'])}"
+    summary = f"Panopta Alert on {params['fqdn']} [{format_duration(params['duration'])}]"
     return [{"op": "replace","path": "status","value": status},
             {"op": "replace","path": "summary","value": summary }]
 
 
 def request_failed(action_description:str, exception:Exception)->Dict:
-    logging.error(f"Ticket {action_description} Failed {e}")
-    return {"message": f"Ticket {action_description} Failed {exception}",
+    logging.error(f"Ticket {action_description} Failed:\n{exception}\n")
+    return {"message": f"Ticket {action_description} Failed:\n{exception}\n",
             "status": 500}
 
 
-def convert_duration(seconds:int)->Dict[str,int]:
+def convert_duration(seconds:str)->Dict[str,int]:
+    seconds = int(seconds)
     __SECS_PER_HOUR = 3600
     __SECS_PER_MIN = 60
     hours = seconds // __SECS_PER_HOUR
     leftover = seconds % __SECS_PER_HOUR
-    mins = (leftover // __SECS_PER_HOUR) if hours else (seconds // __SECS_PER_MIN)
+    mins = (leftover // __SECS_PER_MIN) if hours else (seconds // __SECS_PER_MIN)
     return {"hours":hours, "minutes": mins}
 
 

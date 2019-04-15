@@ -158,8 +158,7 @@ def get_ticket_resolution_body(params:Dict)->List[Dict]:
 
 def get_resolution_note_body(params:Dict)->List[Dict]:
     body = {
-            "text": (f"Cleared at: {params['cleartime']}\n"
-                f"Duration: {format_duration(params['duration'])}\n"
+            "text": (f"Duration: {format_duration(params['duration'])}\n"
                 f"Duration(s): {params['duration']}"),
             "resolutionFlag": "True"
             }

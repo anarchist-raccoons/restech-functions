@@ -37,12 +37,9 @@ def get_clear(req: REQUEST) -> Dict:
 Returns a list of the params required by Panopta
 '''
 def panopta_required_params()->List[str]:
-    return ['Company_name', 
+    return [ 
             'outage_id',
             'fqdn',
-            'services',
-            'items',
-            'cleartime',
             'duration'
             ]
 

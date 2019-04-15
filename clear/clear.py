@@ -7,7 +7,7 @@ import connectwise.connect as cw
 
 
 def run(req: REQUEST) -> RESPONSE:
-    logging.info('Python HTTP trigger function processed a clear request.')
+    logging.info('\nPython HTTP trigger function processed a clear request.\n')
     return allow_request(req) if req.method == "PATCH" else block_request(req)
 
 
@@ -22,14 +22,14 @@ def block_request(req: REQUEST)->RESPONSE:
 
 
 def get_clear(req: REQUEST) -> Dict:
-    logging.info('Clear Received') 
+    logging.info('\nClear Received\n') 
     params = req.get_json()
-    logging.info(f"Received: {params}")
+    logging.info(f"\nReceived: {params}\n")
     # check if any of the required params is missing
     if not all(param in params for param in panopta_required_params()):
         return missing_param_response()
     ticket_exists = cw.find_ticket(params['outage_id'])
-    return cw.close_ticket(params) if ticket_exists else non_existing_ticket()
+    return cw.resolve_ticket(params) if ticket_exists else non_existing_ticket()
 
 
 '''
@@ -39,7 +39,6 @@ def panopta_required_params()->List[str]:
     return ['Company_name', 
             'outage_id',
             'fqdn',
-            'reason',
             'services',
             'items',
             'cleartime',
@@ -57,7 +56,7 @@ def existing_ticket(ticket: Dict)->Dict:
 
 def non_existing_ticket()->Dict:
     return { 
-        "message": f"Ticket does not exists!",
+        "message": f"\nTicket does not exists!\n",
         "status": 500
         }
 
@@ -66,4 +65,3 @@ def missing_param_response()->Dict:
         "message": "Missing one or more required parameters",
         "status": 422
         }
-

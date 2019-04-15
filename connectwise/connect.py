@@ -142,3 +142,12 @@ def request_failed(action_description:str, exception:Exception)->Dict:
     logging.error(f"Ticket " +action_description + " Failed {e}")
     return {"message": f"Ticket "+ action_description + " Failed {exception}",
             "status": 500}
+
+
+def convert_duration(seconds:int)->Dict[str,int]:
+    __SECS_PER_HOUR = 3600
+    __SECS_PER_MIN = 60
+    hours = seconds // __SECS_PER_HOUR
+    leftover = seconds % __SECS_PER_HOUR
+    mins = (leftover // __SECS_PER_HOUR) if hours else (seconds // __SECS_PER_MIN)
+    return {"hours":hours, "minutes": mins}

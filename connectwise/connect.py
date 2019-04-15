@@ -133,14 +133,14 @@ def get_ticket_creation_body(params:Dict)->Dict:
 
 def get_ticket_resolution_body(params:Dict)->List[Dict]:
     status = {"id": cw_resolved()}
-    summary = f"Panopta Alert on {params['fqdn']}: {params['duration']}"
+    summary = f"Panopta Alert on {params['fqdn']}: {format_duration(params['duration'])}"
     return [{"op": "replace","path": "status","value": status},
             {"op": "replace","path": "summary","value": summary }]
 
 
 def request_failed(action_description:str, exception:Exception)->Dict:
-    logging.error(f"Ticket " +action_description + " Failed {e}")
-    return {"message": f"Ticket "+ action_description + " Failed {exception}",
+    logging.error(f"Ticket {action_description} Failed {e}")
+    return {"message": f"Ticket {action_description} Failed {exception}",
             "status": 500}
 
 
@@ -151,3 +151,15 @@ def convert_duration(seconds:int)->Dict[str,int]:
     leftover = seconds % __SECS_PER_HOUR
     mins = (leftover // __SECS_PER_HOUR) if hours else (seconds // __SECS_PER_MIN)
     return {"hours":hours, "minutes": mins}
+
+
+def format_duration(duration:int)->str:
+    converted_duration = convert_duration(duration)
+    duration_str = ""
+    if converted_duration["hours"]:
+        hour_str = ("hours", "hour")[converted_duration["hours"] == 1]
+        duration_str += f"{converted_duration['hours']} {hour_str}" 
+    if converted_duration["minutes"]:
+        min_str = ("minutes", "minute")[converted_duration["minutes"] == 1]
+        duration_str += f" {converted_duration['minutes']} {min_str}" 
+    return duration_str.strip()

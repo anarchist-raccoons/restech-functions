@@ -41,7 +41,7 @@ def generic_get_request(uri:str, error_message:str)->Dict:
 def create_ticket(params)->Dict:
     logging.info('Create Ticket')
     try:
-        body = get_ticket_creation_json(params) 
+        body = get_ticket_creation_body(params) 
         data = json.dumps(body)
         r = requests.post( 
                 f"{cw_uri()}/service/tickets", 
@@ -58,10 +58,11 @@ def create_ticket(params)->Dict:
 def resolve_ticket(params)->Dict:
     logging.info('Resolve Ticket')
     try:
-        body = get_ticket_resolution_json(params) 
+        body = get_ticket_resolution_body(params) 
         data = json.dumps(body)
+        ticket_id = find_ticket(params['outage_id'])[0]['id']
         r = requests.patch( 
-                f"{cw_uri()}/service/tickets", 
+                f"{cw_uri()}/service/tickets/{ticket_id}", 
                 headers=__HEADERS,
                 data=data,
                 auth=(cw_user(), cw_key()))
@@ -107,7 +108,7 @@ def get_ticket_URI(outage_id: str)->str:
     return f"{cw_uri()}{path}"
 
 
-def get_ticket_creation_json(params:Dict)->Dict:
+def get_ticket_creation_body(params:Dict)->Dict:
     desc = (f"Item(s): {params['items']} \n"
             f"Services: {params['services']}\n"
             f"Reasons: {params['reason']}\n"
@@ -132,7 +133,7 @@ def get_ticket_creation_json(params:Dict)->Dict:
     return body
 
 
-def get_ticket_resolution_json(params:Dict)->List[Dict]:
+def get_ticket_resolution_body(params:Dict)->List[Dict]:
     status = {"id": cw_resolved()}
     summary = f"Panopta Alert on {params['fqdn']}: {params['duration']}"
     return [{"op": "replace","path": "status","value": status},

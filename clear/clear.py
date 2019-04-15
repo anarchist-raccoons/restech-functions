@@ -12,8 +12,9 @@ def run(req: REQUEST) -> RESPONSE:
 
 
 def allow_request(req: REQUEST)->RESPONSE:
-    outage = get_clear(req)
-    return RESPONSE(outage['message'], status_code=outage['status'])
+    clear = get_clear(req)
+
+    return RESPONSE(clear['message'], status_code=clear['status'])
 
 
 def block_request(req: REQUEST)->RESPONSE:

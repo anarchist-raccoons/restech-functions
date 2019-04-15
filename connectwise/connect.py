@@ -67,9 +67,27 @@ def resolve_ticket(params)->Dict:
                 headers=__HEADERS,
                 data=data,
                 auth=(cw_user(), cw_key()))
+        update_resolution_note(params)
         return {"message": str(r.json()), "status": r.status_code} 
     except Exception as e:
         return request_failed("resolution", e)
+
+
+def update_resolution_note(params)->Dict:
+    logging.info('updating resolution note')
+    try:
+        body = get_resolution_note_body(params) 
+        data = json.dumps(body)
+        ticket_id = find_ticket(params['outage_id'])[0]['id']
+        logging.info(f"\nTicket ID is {ticket_id}\n")
+        r = requests.post( 
+                f"{cw_uri()}/service/tickets/{ticket_id}/notes", 
+                headers=__HEADERS,
+                data=data,
+                auth=(cw_user(), cw_key()))
+        return {"message": str(r.json()), "status": r.status_code} 
+    except Exception as e:
+        return request_failed("updating the notes of the ", e)
 
 
 def service_board():
@@ -136,6 +154,16 @@ def get_ticket_resolution_body(params:Dict)->List[Dict]:
     summary = f"Panopta Alert on {params['fqdn']} [{format_duration(params['duration'])}]"
     return [{"op": "replace","path": "status","value": status},
             {"op": "replace","path": "summary","value": summary }]
+
+
+def get_resolution_note_body(params:Dict)->List[Dict]:
+    body = {
+            "text": (f"Cleared at: {params['cleartime']}\n"
+                f"Duration: {format_duration(params['duration'])}\n"
+                f"Duration(s): {params['duration']}"),
+            "resolutionFlag": "True"
+            }
+    return body
 
 
 def request_failed(action_description:str, exception:Exception)->Dict:

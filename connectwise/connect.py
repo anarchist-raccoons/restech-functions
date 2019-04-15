@@ -61,15 +61,13 @@ def resolve_ticket(params)->Dict:
         body = get_ticket_resolution_body(params) 
         data = json.dumps(body)
         ticket_id = find_ticket(params['outage_id'])[0]['id']
+        logging.info(f"\nTicket ID is {ticket_id}\n")
         r = requests.patch( 
                 f"{cw_uri()}/service/tickets/{ticket_id}", 
                 headers=__HEADERS,
                 data=data,
                 auth=(cw_user(), cw_key()))
-        return { 
-            "message": str(r.json()),
-            "status": r.status_code
-        } 
+        return {"message": str(r.json()), "status": r.status_code} 
     except Exception as e:
         return request_failed("resolution", e)
 

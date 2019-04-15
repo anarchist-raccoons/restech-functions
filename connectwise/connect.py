@@ -41,29 +41,26 @@ def generic_get_request(uri:str, error_message:str)->Dict:
 def create_ticket(params)->Dict:
     logging.info('Create Ticket')
     try:
-        desc = (f"Item(s): {params['items']} \n"
-                f"Services: {params['services']}\n"
-                f"Reasons: {params['reason']}\n"
-                f"Began at: {params['starttime']}")
-        body = { 
-         "summary": f"Panopta Alert on {params['fqdn']}" ,
-         "company": { "id": int(company_name(params['Company_name'])) }, 
-         "recordType": "ServiceTicket", 
-         "board": { "id": int(service_board()) },
-         "initialDescription": desc,
-         "customFields": [
-             {
-                'id': 60, 
-                'caption': 'Outage ID', 
-                'type': 'Text', 
-                'entryMethod': 'EntryField', 
-                'numberOfDecimals': 0,
-                'value': params['outage_id']
-                }
-             ]
-         }
+        body = get_ticket_creation_json(params) 
         data = json.dumps(body)
         r = requests.post( 
+                f"{cw_uri()}/service/tickets", 
+                headers=__HEADERS,
+                data=data,
+                auth=(cw_user(), cw_key()))
+        return {"message": str(r.json()),
+                "status": r.status_code
+                } 
+    except Exception as e:
+        return request_failed("resolution", e)
+
+
+def resolve_ticket(params)->Dict:
+    logging.info('Resolve Ticket')
+    try:
+        body = get_ticket_resolution_json(params) 
+        data = json.dumps(body)
+        r = requests.patch( 
                 f"{cw_uri()}/service/tickets", 
                 headers=__HEADERS,
                 data=data,
@@ -73,11 +70,7 @@ def create_ticket(params)->Dict:
             "status": r.status_code
         } 
     except Exception as e:
-        logging.error(f"Ticket creation Failed {e}")
-        return { 
-            "message": f"Ticket creation Failed {e}",
-            "status": 500
-        }
+        return request_failed("resolution", e)
 
 
 def service_board():
@@ -100,6 +93,10 @@ def cw_catchall():
     return os.getenv('CW_CATCHALL')
 
 
+def cw_resolved():
+    return os.getenv('CW_RESOLVED')
+
+
 def get_company_name_URI(custid: str)->str:
     path = '/company/companies?conditions=identifier="' + custid + '"'
     return f"{cw_uri()}{path}"
@@ -108,3 +105,41 @@ def get_company_name_URI(custid: str)->str:
 def get_ticket_URI(outage_id: str)->str:
     path = f"/service/tickets?customFieldConditions=caption=\"Outage ID\" AND value = {outage_id}"
     return f"{cw_uri()}{path}"
+
+
+def get_ticket_creation_json(params:Dict)->Dict:
+    desc = (f"Item(s): {params['items']} \n"
+            f"Services: {params['services']}\n"
+            f"Reasons: {params['reason']}\n"
+            f"Began at: {params['starttime']}")
+    body = { 
+         "summary": f"Panopta Alert on {params['fqdn']}" ,
+         "company": { "id": int(company_name(params['Company_name'])) }, 
+         "recordType": "ServiceTicket", 
+         "board": { "id": int(service_board()) },
+         "initialDescription": desc,
+         "customFields": [
+             {
+                 'id': 60, 
+                 'caption': 'Outage ID', 
+                 'type': 'Text', 
+                 'entryMethod': 'EntryField',
+                 'numberOfDecimals': 0,
+                 'value': params['outage_id']
+                 }
+             ]
+         }
+    return body
+
+
+def get_ticket_resolution_json(params:Dict)->List[Dict]:
+    status = {"id": cw_resolved()}
+    summary = f"Panopta Alert on {params['fqdn']}: {params['duration']}"
+    return [{"op": "replace","path": "status","value": status},
+            {"op": "replace","path": "summary","value": summary }]
+
+
+def request_failed(action_description:str, exception:Exception)->Dict:
+    logging.error(f"Ticket " +action_description + " Failed {e}")
+    return {"message": f"Ticket "+ action_description + " Failed {exception}",
+            "status": 500}

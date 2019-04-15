@@ -172,7 +172,7 @@ def request_failed(action_description:str, exception:Exception)->Dict:
 
 
 def convert_duration(seconds:str)->Dict[str,int]:
-    seconds = int(seconds)
+    seconds = int(float(seconds))
     __SECS_PER_HOUR = 3600
     __SECS_PER_MIN = 60
     hours = seconds // __SECS_PER_HOUR

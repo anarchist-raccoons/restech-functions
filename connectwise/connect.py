@@ -72,8 +72,36 @@ def resolve_ticket(params)->Dict:
     except Exception as e:
         return request_failed("resolution", e)
 
+'''
+This function solves the sporadic issue caused by race conditions arising when the 
+clear() function is called before the outage() function.
+'''
+def create_and_resolve(params)->Dict:
+    logging.info('Race condition occurred: clear() was called for non-existing ticket')
+    logging.info('Creating and closing ticket!')
+    create_ticket(params)
+    return resolve_ticket(params)
+
+
 
 def update_resolution_note(params)->Dict:
+    logging.info('updating resolution note')
+    try:
+        body = get_resolution_note_body(params) 
+        data = json.dumps(body)
+        ticket_id = find_ticket(params['outage_id'])[0]['id']
+        logging.info(f"\nTicket ID is {ticket_id}\n")
+        r = requests.post( 
+                f"{cw_uri()}/service/tickets/{ticket_id}/notes", 
+                headers=__HEADERS,
+                data=data,
+                auth=(cw_user(), cw_key()))
+        return {"message": str(r.json()), "status": r.status_code} 
+    except Exception as e:
+        return request_failed("updating the notes of the ", e)
+
+
+def update_status_note(params)->Dict:
     logging.info('updating resolution note')
     try:
         body = get_resolution_note_body(params) 

@@ -47,7 +47,6 @@ def get_outage(req: REQUEST) -> Dict:
     return existing_ticket(ticket_exists) if ticket_exists else cw.create_ticket(params)
 
 
-
 '''
 Returns a list of the params required by Panopta
 '''
@@ -58,10 +57,9 @@ def panopta_required_params()->List[str]:
             'reason',
             'services',
             'items',
-            'starttime'
+            'starttime',
+            'duration'
             ]
-
-
 
 def existing_ticket(ticket: Dict)->Dict:
     return { 

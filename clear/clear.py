@@ -29,7 +29,10 @@ def get_clear(req: REQUEST) -> Dict:
     if not all(param in params for param in panopta_required_params()):
         return missing_param_response()
     ticket_exists = cw.find_ticket(params['outage_id'])
-    return cw.resolve_ticket(params) if ticket_exists else cw.create_and_resolve()
+    if ticket_exists:
+        return cw.resolve_ticket(params) 
+    else:
+        return cw.create_and_resolve(params)
 
 
 '''
@@ -42,7 +45,8 @@ def panopta_required_params()->List[str]:
             'reason',
             'services',
             'items',
-            'starttime'
+            'starttime',
+            'duration'
             ]
 
 

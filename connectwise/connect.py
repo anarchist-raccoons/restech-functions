@@ -52,7 +52,7 @@ def create_ticket(params)->Dict:
                 "status": r.status_code
                 } 
     except Exception as e:
-        return request_failed("resolution", e)
+        return request_failed("creation", e)
 
 
 def resolve_ticket(params)->Dict:

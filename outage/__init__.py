@@ -1,4 +1,5 @@
 import threading
+import logging
 from . import outage
 
 def main(req: outage.REQUEST) -> outage.RESPONSE:
@@ -11,7 +12,7 @@ def main(req: outage.REQUEST) -> outage.RESPONSE:
 
 def webhook_response()->outage.RESPONSE:
     response = outage.RESPONSE(
-            "\nPanopta outage webhook request was received successfully!\n",
+            "\nPanopta outage webhook request was received successfully!\n\n",
             status_code=200)
     return response
 

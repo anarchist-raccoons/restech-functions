@@ -65,6 +65,6 @@ def non_existing_ticket()->Dict:
 
 def missing_param_response()->Dict:
     return { 
-        "message": "Missing one or more required parameters",
+        "message": "\nMissing one or more required parameters!\nCheck the paramaters list in the Panopta Webhook menu.\n",
         "status": 422
         }

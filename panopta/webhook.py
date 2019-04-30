@@ -12,8 +12,8 @@ def run(func_type:str, req: REQUEST) -> RESPONSE:
 
 
 def allow_request(func_type:str, req: REQUEST)->RESPONSE:
-    clear = get_clear(req)
-    return RESPONSE(clear['message'], status_code=clear['status'])
+    function = globals()[func_type]() 
+    return RESPONSE(function['message'], status_code=function['status'])
 
 
 def block_request(req: REQUEST)->RESPONSE:
@@ -21,7 +21,7 @@ def block_request(req: REQUEST)->RESPONSE:
     return RESPONSE(message,status_code=405)
 
 
-def get_clear(req: REQUEST) -> Dict:
+def clear(req: REQUEST) -> Dict:
     logging.info('\nClear Received\n') 
     params = req.get_json()
     logging.info(f"\nReceived: {params}\n")
@@ -33,6 +33,21 @@ def get_clear(req: REQUEST) -> Dict:
         return cw.resolve_ticket(params) 
     else:
         return cw.create_and_resolve(params)
+
+
+def outage(req: REQUEST) -> Dict:
+    logging.info('Outage Received') 
+    params = req.get_json()
+    logging.info(f"Received: {params}")
+    # check if any of the required params is missing
+    if not all(param in params for param in panopta_required_params()):
+        return missing_param_response()
+    ticket_exists = cw.find_ticket(params['outage_id'])
+    if ticket_exists:
+        return existing_ticket(ticket_exists) 
+    else:
+        return cw.create_ticket(params)
+
 
 
 '''

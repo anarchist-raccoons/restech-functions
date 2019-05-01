@@ -7,12 +7,13 @@ import connectwise.connect as cw
 
 
 def run(func_type:str, req: REQUEST) -> RESPONSE:
+    logging.basicConfig(level=logging.INFO)
     logging.info('\nPython HTTP trigger function processed a clear request.\n')
     return allow_request(func_type, req) if req.method == "POST" else block_request(req)
 
 
 def allow_request(func_type:str, req: REQUEST)->RESPONSE:
-    function = globals()[func_type]() 
+    function = globals()[func_type](req) 
     return RESPONSE(function['message'], status_code=function['status'])
 
 

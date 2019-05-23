@@ -121,6 +121,8 @@ def update_status_note(params)->Dict:
 def service_board():
     return os.getenv('CW_SERVICE_BOARD')
 
+def bloom_service_board():
+    return os.getenv('CW_BLOOM_SERVICE_BOARD')
 
 def cw_key():
     return os.getenv('CW_KEY')
